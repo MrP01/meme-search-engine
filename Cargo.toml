@@ -41,7 +41,7 @@ fastrand = "2"
 mimalloc = "0.1"
 sonic-rs = "0.3"
 ffmpeg-the-third = "2.0"
-compact_str = { version = "0.8.0-beta", features = ["serde"] }
+compact_str = { version = "0.8.1", features = ["serde"] }
 itertools = "0.13"
 async-recursion = "1"
 fast_image_resize = { version = "5", features = ["image"] }
