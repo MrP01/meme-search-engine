@@ -1,5 +1,4 @@
 use image::codecs::bmp::BmpEncoder;
-use lazy_static::lazy_static;
 use serde::{Serialize, Deserialize};
 use std::borrow::Borrow;
 use std::cell::RefCell;

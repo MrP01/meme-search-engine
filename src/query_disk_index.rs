@@ -9,13 +9,13 @@ use foldhash::{HashSet, HashSetExt};
 use half::f16;
 use diskann::{NeighbourBuffer, vector::{fast_dot_noprefetch, QueryLUT, scale_dot_result, scale_dot_result_f64, SCALE_F64}};
 use simsimd::SpatialSimilarity;
-use memmap2::{Mmap, MmapOptions};
+use memmap2::MmapOptions;
 use std::rc::Rc;
 use monoio::net::{TcpListener, TcpStream};
 use monoio::io::IntoPollIo;
-use hyper::{body::{Body, Bytes, Incoming, Frame}, server::conn::http1, Method, Request, Response, StatusCode};
-use http_body_util::{BodyExt, Empty, Full};
-use prometheus::{register_int_counter, register_int_counter_vec, register_int_gauge, Encoder, IntCounter, IntGauge, IntCounterVec};
+use hyper::{body::{Body, Bytes, Incoming}, server::conn::http1, Method, Request, Response, StatusCode};
+use http_body_util::{BodyExt, Full};
+use prometheus::{register_int_counter, register_int_counter_vec, Encoder, IntCounter, IntCounterVec};
 use std::pin::Pin;
 use std::future::Future;
 use serde::{Serialize, Deserialize};
@@ -26,7 +26,7 @@ use std::sync::Arc;
 
 mod common;
 
-use common::{resize_for_embed_sync, QueryTerm, FrontendInit, IndexHeader, InferenceServerConfig, PackedIndexEntry, QueryRequest, QueryResult};
+use common::{resize_for_embed_sync, FrontendInit, IndexHeader, InferenceServerConfig, PackedIndexEntry, QueryRequest, QueryResult};
 
 #[derive(FromArgs, Clone)]
 #[argh(description="Query disk index")]
@@ -267,7 +267,7 @@ async fn evaluate(args: Arc<CLIArguments>, memory_maps: Arc<MemoryMaps>) -> Resu
         }
 
         matches.sort_unstable_by_key(|x| -x.1);
-        let mut matches = matches.into_iter().enumerate().map(|(i, (id, distance, url, shards))| (id, i)).collect::<Vec<_>>();
+        let mut matches = matches.into_iter().enumerate().map(|(i, (id, _distance, _url, _shards))| (id, i)).collect::<Vec<_>>();
         matches.sort_unstable();
 
         /*for (id, distance, url, shards) in matches.iter().take(20) {
@@ -474,7 +474,7 @@ impl hyper::service::Service<Request<Incoming>> for Service {
 
                     let query = query.iter().map(|x| half::f16::from_f32(*x)).collect::<Vec<f16>>();
 
-                    let cmps_result = greedy_search(&mut scratch, selected_start, &query, &query_preprocessed, &descriptor_scales, index.clone(), false, beamwidth).await?;
+                    let _cmps_result = greedy_search(&mut scratch, selected_start, &query, &query_preprocessed, &descriptor_scales, index.clone(), false, beamwidth).await?;
                     QUERIES_COUNTER.inc();
 
                     let n_visited = scratch.visited_list.len();

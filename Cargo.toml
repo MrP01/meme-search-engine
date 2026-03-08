@@ -64,7 +64,7 @@ http-body-util = "0.1"
 matrixmultiply = "0.3"
 bitvec = "1"
 region = "3"
-faiss-sys = { version = "0.7.0", features = ["static"] }
+faiss = { version = "0.13.0", features = ["static"] }
 
 [[bin]]
 name = "reddit-dump"
