@@ -21,7 +21,6 @@ chrono = "0.4"
 base64 = "0.22"
 anyhow = "1"
 fnv = "1"
-faiss = "0.12"
 ndarray = "0.15"
 half = { version = "2" }
 regex = "1"
@@ -65,6 +64,7 @@ http-body-util = "0.1"
 matrixmultiply = "0.3"
 bitvec = "1"
 region = "3"
+faiss-sys = { version = "0.7.0", features = ["static"] }
 
 [[bin]]
 name = "reddit-dump"
