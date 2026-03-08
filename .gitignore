@@ -10,6 +10,7 @@ node_modules
 *sqlite3*
 thumbtemp
 mse-test-db-small
+data
 clipfront2/static/bg*
 diskann/target
 *.bin

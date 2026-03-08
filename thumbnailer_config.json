@@ -1,5 +1,5 @@
 {
-  "database": "/srv/mse/thumb.sqlite3",
-  "input": "/data/public",
-  "output": "/data/public/thumbs"
+  "database": "./data/thumbs.sqlite3",
+  "input": "./data/memes",
+  "output": "./data/thumbs"
 }

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+import pathlib
 import sqlite3
 import os
 import json
@@ -107,8 +109,8 @@ def jpeg_format(quality=None, maxwidth=None, maxheight=None, target_size=None):
     return fn
 
 
-input_path = CONFIG["input"]
-output_path = CONFIG["output"]
+input_path = pathlib.Path(CONFIG["input"]).resolve()
+output_path = pathlib.Path(CONFIG["output"]).resolve()
 exts = {".webp", ".png", ".jpg", ".jpeg"}
 output_formats = {
     "avif-lq": (avif_format(quality=30), ".avif", "image/avif"),
@@ -158,15 +160,15 @@ def to_outpath(input, format):
 
 full_formats = generate_output_format_string(output_formats.keys())
 
-for directory, subdirectories, files in os.walk(input_path):
+for directory, subdirectories, files in input_path.walk():
     directory = os.path.join(input_path, directory)
-    if directory.startswith(output_path):
-        continue
+    # if directory.startswith(output_path):
+    #     continue
     for file in os.listdir(directory):
         ext = os.path.splitext(file)[-1].lower()
         if ext in exts:
             path = os.path.join(directory, file)
-            rawname = path.removeprefix(input_path).removeprefix("/")
+            rawname = path.removeprefix(str(input_path)).removeprefix("/")
             st = os.stat(path)
             csr = con.execute("SELECT mtime, formats FROM thumb WHERE file = ?", (rawname,))
             row = csr.fetchone()

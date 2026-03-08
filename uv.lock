@@ -395,9 +395,9 @@ dependencies = [
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.13.3" },
     { name = "msgpack", specifier = ">=1.1.2" },
-    { name = "open-clip-torch", specifier = ">=2.31.0" },
+    { name = "open-clip-torch", specifier = ">=3.3.0" },
     { name = "pillow", specifier = ">=12.1.1" },
-    { name = "prometheus-client", specifier = ">=0.17.1" },
+    { name = "prometheus-client", specifier = ">=0.24.1" },
     { name = "transformers", specifier = ">=5.3.0" },
 ]
 
@@ -655,7 +655,7 @@ wheels = [
 
 [[package]]
 name = "open-clip-torch"
-version = "2.31.0"
+version = "3.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "ftfy" },
@@ -667,9 +667,9 @@ dependencies = [
     { name = "torchvision" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/23/2d/df12ee8417c918fde4c8c6af470ae2c2d2dc75971dc1e3cc7f108a3cd92a/open_clip_torch-2.31.0.tar.gz", hash = "sha256:a3998b5ac13a1d11b003e6147f2dea834c7a48b3fd7d902fc17a0fff7638e6ee", size = 1486178, upload-time = "2025-02-23T16:25:22.722Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4a/1f/2bc9795047fa2c1ad2567ef78ce6dfc9a7b763fa534acee09a94da2a5b8f/open_clip_torch-3.3.0.tar.gz", hash = "sha256:904b1a9f909df8281bb3de60ab95491cd2994a509177ea4f9d6292a84fe24d6d", size = 1503380, upload-time = "2026-02-27T00:32:46.74Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/02/91/8b1da3a397948edb8082f2838a24de7dda807adae6cbfcd56db475b9df16/open_clip_torch-2.31.0-py3-none-any.whl", hash = "sha256:92dd8c2d6d994e061de46465e711f87b682858842eb9926130e401014d33af0d", size = 1523658, upload-time = "2025-02-23T16:25:20.635Z" },
+    { url = "https://files.pythonhosted.org/packages/37/b5/41c315ccd94ca332ead3e832e83eee343ab245005c3e43d9d3e75eae34eb/open_clip_torch-3.3.0-py3-none-any.whl", hash = "sha256:c549ad5ed6bfc119cc11105033c0a2b9d7a2a4afeb40a58a09aab3da1a0043ce", size = 1547268, upload-time = "2026-02-27T00:32:44.902Z" },
 ]
 
 [[package]]
@@ -716,11 +716,11 @@ wheels = [
 
 [[package]]
 name = "prometheus-client"
-version = "0.17.1"
+version = "0.24.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f5/05/aee33352594522c56eb4a4382b5acd9a706a030db9ba2fc3dc38a283e75c/prometheus_client-0.17.1.tar.gz", hash = "sha256:21e674f39831ae3f8acde238afd9a27a37d0d2fb5a28ea094f0ce25d2cbf2091", size = 90360, upload-time = "2023-07-10T21:20:18.25Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f0/58/a794d23feb6b00fc0c72787d7e87d872a6730dd9ed7c7b3e954637d8f280/prometheus_client-0.24.1.tar.gz", hash = "sha256:7e0ced7fbbd40f7b84962d5d2ab6f17ef88a72504dcf7c0b40737b43b2a461f9", size = 85616, upload-time = "2026-01-14T15:26:26.965Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ad/b3/6e18c89bf6bd120590ea538a62cae16dc763ff2745b18377c4be5495c4aa/prometheus_client-0.17.1-py3-none-any.whl", hash = "sha256:e537f37160f6807b8202a6fc4764cdd19bac5480ddd3e0d463c3002b34462101", size = 60601, upload-time = "2023-07-10T21:20:16.034Z" },
+    { url = "https://files.pythonhosted.org/packages/74/c3/24a2f845e3917201628ecaba4f18bab4d18a337834c1df2a159ee9d22a42/prometheus_client-0.24.1-py3-none-any.whl", hash = "sha256:150db128af71a5c2482b36e588fc8a6b95e498750da4b17065947c16070f4055", size = 64057, upload-time = "2026-01-14T15:26:24.42Z" },
 ]
 
 [[package]]
