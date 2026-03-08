@@ -10,5 +10,7 @@ db.row_factory = sqlite3.Row
 with open("top.json", "r") as f:
     listing = json.load(f)
 
-db.executemany("INSERT INTO queue VALUES (?, ?, ?)", [ (x[0], x[1], iteration) for x, v in listing ])
+db.executemany(
+    "INSERT INTO queue VALUES (?, ?, ?)", [(x[0], x[1], iteration) for x, v in listing]
+)
 db.commit()

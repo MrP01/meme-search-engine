@@ -17,5 +17,14 @@ CREATE TABLE IF NOT EXISTS files (
 
 with jsonlines.open("sample.jsonl") as reader:
     for obj in reader:
-        shared.db.execute("INSERT OR REPLACE INTO files (filename, title, link, embedding, timestamp) VALUES (?, ?, ?, ?, ?)", (obj["metadata"]["final_url"], obj["title"], f"https://reddit.com/r/{obj['subreddit']}/comments/{obj['id']}", sqlite3.Binary(np.array(obj["embedding"], dtype=np.float16).tobytes()), obj["timestamp"]))
+        shared.db.execute(
+            "INSERT OR REPLACE INTO files (filename, title, link, embedding, timestamp) VALUES (?, ?, ?, ?, ?)",
+            (
+                obj["metadata"]["final_url"],
+                obj["title"],
+                f"https://reddit.com/r/{obj['subreddit']}/comments/{obj['id']}",
+                sqlite3.Binary(np.array(obj["embedding"], dtype=np.float16).tobytes()),
+                obj["timestamp"],
+            ),
+        )
 shared.db.commit()

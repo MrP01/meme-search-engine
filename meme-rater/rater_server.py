@@ -6,8 +6,9 @@ import sys
 
 PORT, DATABASE = sys.argv[1:]
 
-app = web.Application(client_max_size=32*1024**2)
+app = web.Application(client_max_size=32 * 1024**2)
 routes = web.RouteTableDef()
+
 
 async def get_pair(db):
     while True:
@@ -18,16 +19,23 @@ async def get_pair(db):
         if row:
             m1, m2, iteration = row
         else:
-            filenames = [ x[0] for x in await db.execute_fetchall("SELECT filename FROM files", ()) ]
+            filenames = [
+                x[0]
+                for x in await db.execute_fetchall("SELECT filename FROM files", ())
+            ]
             m1, m2 = tuple(sorted(random.sample(filenames, 2)))
-        csr = await db.execute("SELECT 1 FROM ratings WHERE meme1 = ? AND meme2 = ?", (m1, m2))
+        csr = await db.execute(
+            "SELECT 1 FROM ratings WHERE meme1 = ? AND meme2 = ?", (m1, m2)
+        )
         if not await csr.fetchone():
             return m1, m2, iteration
+
 
 @routes.get("/")
 async def index(request):
     meme1, meme2, iteration = await get_pair(request.app["db"])
-    return web.Response(text=f"""
+    return web.Response(
+        text=f"""
 <!DOCTYPE html>
 <html>
     <title>Data Labelling Frontend (Not Evil)</title>
@@ -115,7 +123,10 @@ async def index(request):
         </script>
     </body>
 </html>
-    """, content_type="text/html")
+    """,
+        content_type="text/html",
+    )
+
 
 @routes.post("/rate")
 async def rate(request):
@@ -124,11 +135,21 @@ async def rate(request):
     meme1 = post["meme1"]
     meme2 = post["meme2"]
     iteration = post["iteration"]
-    rating = post["rating-useful"] + "," + post["rating-meme"] + "," + post["rating-aesthetic"]
-    await db.execute("INSERT INTO ratings (meme1, meme2, rating, iteration, ip) VALUES (?, ?, ?, ?, ?)", (meme1, meme2, rating, iteration, request.remote))
+    rating = (
+        post["rating-useful"]
+        + ","
+        + post["rating-meme"]
+        + ","
+        + post["rating-aesthetic"]
+    )
+    await db.execute(
+        "INSERT INTO ratings (meme1, meme2, rating, iteration, ip) VALUES (?, ?, ?, ?, ?)",
+        (meme1, meme2, rating, iteration, request.remote),
+    )
     await db.execute("DELETE FROM queue WHERE meme1 = ? AND meme2 = ?", (meme1, meme2))
     await db.commit()
     return web.HTTPFound("/")
+
 
 async def main():
     app["db"] = await aiosqlite.connect(DATABASE)
@@ -155,6 +176,7 @@ CREATE TABLE IF NOT EXISTS queue (
     await runner.setup()
     site = web.TCPSite(runner, "", int(PORT))
     await site.start()
+
 
 if __name__ == "__main__":
     loop = asyncio.new_event_loop()

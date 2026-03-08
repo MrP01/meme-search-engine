@@ -1,17 +1,15 @@
 import torch.nn
 import torch.nn.functional as F
 import torch
-import numpy
 import json
-import time
-from tqdm import tqdm
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 import math
 
 from model import SAEConfig, SAE
-from shared import train_split, loaded_arrays, ckpt_path, loaded_arrays_permutation
+from shared import ckpt_path
 
 device = "cuda"
+
 
 @dataclass
 class TrainConfig:
@@ -22,6 +20,7 @@ class TrainConfig:
     epochs: int
     compile: bool
 
+
 config = TrainConfig(
     model=SAEConfig(
         d_emb=1152,
@@ -29,7 +28,7 @@ config = TrainConfig(
         top_k=128,
         device=device,
         dtype=torch.float32,
-        up_proj_bias=False
+        up_proj_bias=False,
     ),
     lr=3e-4,
     weight_decay=0.0,
@@ -38,17 +37,22 @@ config = TrainConfig(
     compile=True,
 )
 
+
 def exprange(min, max, n):
     lmin, lmax = math.log(min), math.log(max)
     step = (lmax - lmin) / (n - 1)
     return (math.exp(lmin + step * i) for i in range(n))
 
+
 model = SAE(config.model)
 params = sum(p.numel() for p in model.parameters())
-print(f"{params/1e6:.1f}M parameters")
+print(f"{params / 1e6:.1f}M parameters")
 print(model)
 
-optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
+optimizer = torch.optim.AdamW(
+    model.parameters(), lr=config.lr, weight_decay=config.weight_decay
+)
+
 
 def train_step(model, batch):
     optimizer.zero_grad()
@@ -58,21 +62,26 @@ def train_step(model, batch):
     optimizer.step()
     return loss
 
+
 if config.compile:
     print("compiling...")
     train_step = torch.compile(train_step)
 
+
 def save_ckpt(log, steps):
-    #print("saving...")
+    # print("saving...")
     modelc, optimc = ckpt_path(steps)
     torch.save(optimizer.state_dict(), optimc)
     torch.save({"model": model.state_dict(), "config": config}, modelc)
+
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, torch.dtype):
             return str(o)
-        else: return super().default(o)
+        else:
+            return super().default(o)
+
 
 """
 logfile = f"logs/log-{time.time()}.jsonl"

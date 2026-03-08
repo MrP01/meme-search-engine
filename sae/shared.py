@@ -8,5 +8,6 @@ loaded_arrays_permutation = np.random.permutation(len(loaded_arrays))
 
 train_split = 0.8
 
+
 def ckpt_path(steps):
     return f"ckpt/{steps}.pt", f"ckpt/{steps}.optim.pt"

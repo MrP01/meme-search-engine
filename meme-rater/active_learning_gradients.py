@@ -1,11 +1,8 @@
 import torch.nn
 import torch.nn.functional as F
 import torch
-import sqlite3
 import random
-import numpy
 import json
-import time
 from tqdm import tqdm
 from torch.func import functional_call, vmap, grad
 import sys
@@ -24,13 +21,13 @@ config = Config(
     device=device,
     dtype=torch.float32,
     output_channels=3,
-    dropout=0.1
+    dropout=0.1,
 )
 model = BradleyTerry(config)
 modelc, _ = shared.checkpoint_for(int(sys.argv[1]))
 model.load_state_dict(torch.load(modelc))
 params = sum(p.numel() for p in model.parameters())
-print(f"{params/1e6:.1f}M parameters")
+print(f"{params / 1e6:.1f}M parameters")
 print(model)
 model.eval()
 
@@ -39,6 +36,7 @@ importance = {}
 
 params = {k: v.detach() for k, v in model.named_parameters()}
 buffers = {k: v.detach() for k, v in model.named_buffers()}
+
 
 # https://pytorch.org/tutorials/intermediate/per_sample_grads.html
 def compute_loss(params, buffers, sample, target):
@@ -49,6 +47,7 @@ def compute_loss(params, buffers, sample, target):
     loss = F.binary_cross_entropy(predictions, targets)
     return loss
 
+
 ft_compute_grad = grad(compute_loss)
 ft_compute_sample_grad = vmap(ft_compute_grad, in_dims=(None, None, 1, 1))
 
@@ -57,14 +56,30 @@ for _ in range(num_pairs):
     pairs.append(tuple(random.sample(files, 2)))
 
 for bstart in tqdm(range(0, len(pairs), batch_size)):
-    batch = pairs[bstart:bstart + batch_size]
-    filenames = [ (f1, f2) for ((f1, e1), (f2, e2)) in batch ]
-    embs = torch.stack([ torch.stack((torch.Tensor(e1).to(config.dtype), torch.Tensor(e2).to(config.dtype))) for ((f1, e1), (f2, e2)) in batch ])
-    inputs = embs.unsqueeze(0).expand((config.n_ensemble, batch_size, 2, config.d_emb)).to(device)
-    #win_probs = model(inputs)
+    batch = pairs[bstart : bstart + batch_size]
+    filenames = [(f1, f2) for ((f1, e1), (f2, e2)) in batch]
+    embs = torch.stack(
+        [
+            torch.stack(
+                (torch.Tensor(e1).to(config.dtype), torch.Tensor(e2).to(config.dtype))
+            )
+            for ((f1, e1), (f2, e2)) in batch
+        ]
+    )
+    inputs = (
+        embs.unsqueeze(0)
+        .expand((config.n_ensemble, batch_size, 2, config.d_emb))
+        .to(device)
+    )
+    # win_probs = model(inputs)
     # TODO gradients
     # don't take variance: do backwards pass and compute gradient norm
-    grads = ft_compute_sample_grad(params, buffers, inputs, torch.full((1, batch_size, config.output_channels), 0.95).to(device))
+    grads = ft_compute_sample_grad(
+        params,
+        buffers,
+        inputs,
+        torch.full((1, batch_size, config.output_channels), 0.95).to(device),
+    )
     total_grad_norms = torch.zeros(batch_size).to(device)
     for k, v in grads.items():
         param_dims = tuple(range(1, len(v.shape)))

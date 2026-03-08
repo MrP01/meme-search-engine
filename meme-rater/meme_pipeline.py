@@ -47,13 +47,13 @@ config = Config(
     n_ensemble=16,
     device=device,
     dtype=torch.float32,
-    dropout=0.1
+    dropout=0.1,
 )
 model = BradleyTerry(config).float()
 modelc, _ = shared.checkpoint_for(1500)
 model.load_state_dict(torch.load(modelc))
 params = sum(p.numel() for p in model.parameters())
-print(f"{params/1e6:.1f}M parameters")
+print(f"{params / 1e6:.1f}M parameters")
 print(model)
 
 files = shared.fetch_all_files()
@@ -62,37 +62,55 @@ ratings = {}
 model.eval()
 with torch.inference_mode():
     for bstart in tqdm(range(0, len(files), batch_size)):
-        batch = files[bstart:bstart + batch_size]
-        filenames = [ filename for filename, embedding in batch ]
-        embs = torch.stack([ torch.Tensor(embedding) for filename, embedding in batch ])
-        inputs = embs.unsqueeze(0).expand((config.n_ensemble, len(batch), config.d_emb)).to(device)
+        batch = files[bstart : bstart + batch_size]
+        filenames = [filename for filename, embedding in batch]
+        embs = torch.stack([torch.Tensor(embedding) for filename, embedding in batch])
+        inputs = (
+            embs.unsqueeze(0)
+            .expand((config.n_ensemble, len(batch), config.d_emb))
+            .to(device)
+        )
         scores = model.ensemble(inputs).float()
         mscores = torch.median(scores, dim=0).values
         for filename, mscore in zip(filenames, mscores):
             ratings[filename] = float(mscore)
 
 print(sorted(ratings.values())[round(len(ratings) * 0.95)])
-print(f"{len(ratings)} memes in {crawl_start - last_crawl} seconds ({len(ratings) / (crawl_start - last_crawl) * 1e3}mHz)")
+print(
+    f"{len(ratings)} memes in {crawl_start - last_crawl} seconds ({len(ratings) / (crawl_start - last_crawl) * 1e3}mHz)"
+)
 
 files = dict(files)
 
+
 async def run_inserts():
     async with aiohttp.ClientSession():
+
         async def duplicate_exists(embedding):
-            async with aiohttp.request("POST", meme_search_backend, json={
-                "terms": [{ "embedding": list(float(x) for x in embedding) }], # sorry
-                "k": 1
-            }) as res:
+            async with aiohttp.request(
+                "POST",
+                meme_search_backend,
+                json={
+                    "terms": [
+                        {"embedding": list(float(x) for x in embedding)}
+                    ],  # sorry
+                    "k": 1,
+                },
+            ) as res:
                 result = await res.json()
                 closest = result["matches"][0][0]
-                return closest > 0.99 # arbitrary threshold, TODO
+                return closest > 0.99  # arbitrary threshold, TODO
 
         for filename, rating in ratings.items():
             if rating > score_threshold and not await duplicate_exists(files[filename]):
-                shared.db.execute("INSERT OR REPLACE INTO library_queue VALUES (?, ?)", (filename, rating))
+                shared.db.execute(
+                    "INSERT OR REPLACE INTO library_queue VALUES (?, ?)",
+                    (filename, rating),
+                )
             else:
                 os.unlink(basedir / filename)
     shared.db.execute("INSERT INTO last_crawl VALUES (?)", (crawl_start,))
     shared.db.commit()
+
 
 asyncio.run(run_inserts())

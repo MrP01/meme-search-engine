@@ -24,9 +24,9 @@ plt.plot(keys, values)
 plt.xticks(keys, rotation=45)
 
 # Add labels and title
-plt.xlabel('Percentile')
-plt.ylabel('Memes Kept')
-plt.title('Final Model Evaluation')
+plt.xlabel("Percentile")
+plt.ylabel("Memes Kept")
+plt.title("Final Model Evaluation")
 
 # Display the plot
 plt.tight_layout()

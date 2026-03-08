@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from dataclasses import dataclass
-from functools import partial
+
 
 @dataclass
 class SAEConfig:
@@ -13,14 +13,25 @@ class SAEConfig:
     device: str
     dtype: torch.dtype
 
+
 class SAE(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        self.up_proj = nn.Linear(config.d_emb, config.d_hidden, dtype=config.dtype, device=config.device, bias=config.up_proj_bias)
-        self.down_proj = nn.Linear(config.d_hidden, config.d_emb, dtype=config.dtype, device=config.device)
+        self.up_proj = nn.Linear(
+            config.d_emb,
+            config.d_hidden,
+            dtype=config.dtype,
+            device=config.device,
+            bias=config.up_proj_bias,
+        )
+        self.down_proj = nn.Linear(
+            config.d_hidden, config.d_emb, dtype=config.dtype, device=config.device
+        )
         self.down_proj.weight = nn.Parameter(self.up_proj.weight.T.clone())
-        self.feature_activation_counter = torch.zeros(config.d_hidden, dtype=torch.int32, device=config.device)
+        self.feature_activation_counter = torch.zeros(
+            config.d_hidden, dtype=torch.int32, device=config.device
+        )
         self.reset_counters()
 
     def reset_counters(self):

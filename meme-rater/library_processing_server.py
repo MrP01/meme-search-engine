@@ -1,10 +1,8 @@
 from aiohttp import web
 import aiosqlite
 import asyncio
-import random
 import sys
 import json
-import os
 from pathlib import Path
 import shutil
 
@@ -14,15 +12,19 @@ with open("rater_mse_config.json", "r") as f:
     basedir = Path(mse_config["files"])
 TARGET_DIR = Path(TARGET_DIR)
 
-app = web.Application(client_max_size=32*1024**2)
+app = web.Application(client_max_size=32 * 1024**2)
 routes = web.RouteTableDef()
+
 
 @routes.get("/")
 async def index(request):
-    csr = await request.app["db"].execute("SELECT filename FROM library_queue ORDER BY score DESC")
-    filename, = await csr.fetchone()
+    csr = await request.app["db"].execute(
+        "SELECT filename FROM library_queue ORDER BY score DESC"
+    )
+    (filename,) = await csr.fetchone()
     await csr.close()
-    return web.Response(text=f"""
+    return web.Response(
+        text=f"""
 <!DOCTYPE html>
 <html>
     <style>
@@ -58,14 +60,19 @@ input {{
         </script>
     </body>
 </html>
-    """, content_type="text/html")
+    """,
+        content_type="text/html",
+    )
+
 
 def find_new_path(basename, ext):
     ctr = 1
     while True:
         new = TARGET_DIR / (basename + ("" if ctr == 1 else "-" + str(ctr)) + ext)
-        if not new.exists(): return new
+        if not new.exists():
+            return new
         ctr += 1
+
 
 @routes.post("/")
 async def rate(request):
@@ -75,15 +82,18 @@ async def rate(request):
     original_filename = post["original_filename"]
     real_path = basedir / original_filename
     assert real_path.is_file()
-    if filename == "": # bad meme, discard
+    if filename == "":  # bad meme, discard
         real_path.unlink()
     else:
         new_path = find_new_path(filename.replace(" ", "-"), real_path.suffix)
         print(real_path, new_path, real_path.suffix)
         shutil.move(real_path, new_path)
-    await db.execute("DELETE FROM library_queue WHERE filename = ?", (original_filename,))
+    await db.execute(
+        "DELETE FROM library_queue WHERE filename = ?", (original_filename,)
+    )
     await db.commit()
     return web.HTTPFound("/")
+
 
 async def main():
     app["db"] = await aiosqlite.connect(DATABASE)
@@ -94,6 +104,7 @@ async def main():
     await runner.setup()
     site = web.TCPSite(runner, "", int(PORT))
     await site.start()
+
 
 if __name__ == "__main__":
     loop = asyncio.new_event_loop()
