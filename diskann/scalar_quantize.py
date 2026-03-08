@@ -6,11 +6,7 @@ n_buckets = n_dims
 # n_buckets = n_dims // 2 # we now have one quant scale per pair of components
 # pair_separation = 16 # for efficient dot product computation, we need to have the second element of a pair exactly chunk_size after the first
 n_dims_per_bucket = n_dims // n_buckets
-data = (
-    np.fromfile("embeddings.bin", dtype=np.float16)
-    .reshape(-1, n_dims)
-    .astype(np.float32)
-)  # sorry
+data = np.fromfile("embeddings.bin", dtype=np.float16).reshape(-1, n_dims).astype(np.float32)  # sorry
 
 CUTOFF = 1e-3 / 2
 
@@ -81,11 +77,7 @@ for bucket in range(n_buckets):
     scales.append(1 / step_size)
     q_offset = int(bucket_gmins[bucket] / step_size)
     q_offsets.append(q_offset)
-    nsfb = (
-        (2**31 - 1)
-        / (n_dims_per_bucket * abs((255**2) + 2 * q_offset * 255 + q_offset**2))
-        / 2
-    )
+    nsfb = (2**31 - 1) / (n_dims_per_bucket * abs((255**2) + 2 * q_offset * 255 + q_offset**2)) / 2
     # we are bounded both by overflow in accumulation and PLMULLW (u8 plus offset times scale factor)
     scale_factor_bound = min(scale_factor_bound, nsfb, (2**15 - 1) // (q_offset + 255))
     offsets.append(bucket_gmins[bucket])

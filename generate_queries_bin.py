@@ -15,9 +15,7 @@ async def use_emb_server(sess, query):
             return response
         else:
             raise Exception(
-                response
-                if res.headers.get("content-type") == "application/msgpack"
-                else (await res.text())
+                response if res.headers.get("content-type") == "application/msgpack" else (await res.text())
             )
 
 

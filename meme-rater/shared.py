@@ -73,13 +73,8 @@ def generate_random_permutations(x, n):
 
 
 def fetch_all_files():
-    csr = db.execute(
-        "SELECT filename, embedding FROM files WHERE embedding IS NOT NULL"
-    )
-    x = [
-        (row[0], numpy.frombuffer(row[1], dtype="float16").copy())
-        for row in csr.fetchall()
-    ]
+    csr = db.execute("SELECT filename, embedding FROM files WHERE embedding IS NOT NULL")
+    x = [(row[0], numpy.frombuffer(row[1], dtype="float16").copy()) for row in csr.fetchall()]
     csr.close()
     return x
 

@@ -80,9 +80,7 @@ def compile_vit(
     mark_output(Y)
 
     target = detect_target(use_fp16_acc=use_fp16_acc)
-    exe_module = compile_model(
-        Y, target, "./tmp", "vision_transformer_bs%d_seq%d" % (batch_size, seq_len)
-    )
+    exe_module = compile_model(Y, target, "./tmp", "vision_transformer_bs%d_seq%d" % (batch_size, seq_len))
     return exe_module
 
 
@@ -110,22 +108,12 @@ def load_pretrained(config):
                 print(orig_key, key.replace(".", "_"))
     if USE_CUDA:
         # horrors
-        torch.zeros(
-            (config["emb_dim"], config["patch_size"], config["patch_size"], 4)
-        ).cuda().half()
-        w = st[
-            "visual.trunk.patch_embed.proj.weight"
-        ]  # .permute((0, 2, 3, 1)).contiguous()
-        params["patch_embed_proj_weight"] = (
-            w.permute((0, 2, 3, 1)).contiguous().cuda().half()
-        )  # N H W C
+        torch.zeros((config["emb_dim"], config["patch_size"], config["patch_size"], 4)).cuda().half()
+        w = st["visual.trunk.patch_embed.proj.weight"]  # .permute((0, 2, 3, 1)).contiguous()
+        params["patch_embed_proj_weight"] = w.permute((0, 2, 3, 1)).contiguous().cuda().half()  # N H W C
     else:
         params["patch_embed_proj_weight"] = (
-            st["visual.trunk.patch_embed.proj.weight"]
-            .permute((0, 2, 3, 1))
-            .contiguous()
-            .cuda()
-            .half()
+            st["visual.trunk.patch_embed.proj.weight"].permute((0, 2, 3, 1)).contiguous().cuda().half()
         )
     return params
 
@@ -151,11 +139,7 @@ def benchmark(name, config, batch_size, mod=None, graph_mode=True):
     mod.set_many_constants_with_tensors(params_ait)
     mod.fold_constants(sync=True)
 
-    inputs = [
-        torch.randn([batch_size, config["img_size"], config["img_size"], 3])
-        .cuda()
-        .half()
-    ]
+    inputs = [torch.randn([batch_size, config["img_size"], config["img_size"], 3]).cuda().half()]
     ys = []
     num_outputs = len(mod.get_output_name_to_index_map())
     for i in range(num_outputs):

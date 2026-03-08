@@ -29,9 +29,7 @@ print(pca.components_)
 
 
 def emb_url(embedding):
-    return meme_search_url + base64.urlsafe_b64encode(
-        embedding.astype(np.float16).tobytes()
-    ).decode("utf-8")
+    return meme_search_url + base64.urlsafe_b64encode(embedding.astype(np.float16).tobytes()).decode("utf-8")
 
 
 async def get_exemplars():
@@ -51,9 +49,7 @@ div img {
                     "POST",
                     meme_search_backend,
                     json={
-                        "terms": [
-                            {"embedding": list(float(x) for x in embedding)}
-                        ],  # sorry
+                        "terms": [{"embedding": list(float(x) for x in embedding)}],  # sorry
                         "k": 10,
                     },
                 ) as res:

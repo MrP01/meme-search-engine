@@ -7,16 +7,8 @@ import math
 n_dims = 1152
 output_dims = 64 * 8
 scale = 1 / math.sqrt(n_dims)
-dataset = (
-    np.fromfile("embeddings.bin", dtype=np.float16)
-    .reshape(-1, n_dims)[:100000]
-    .astype(np.float32)
-)
-queryset = (
-    np.fromfile("query.bin", dtype=np.float16)
-    .reshape(-1, n_dims)[:100000]
-    .astype(np.float32)
-)
+dataset = np.fromfile("embeddings.bin", dtype=np.float16).reshape(-1, n_dims)[:100000].astype(np.float32)
+queryset = np.fromfile("query.bin", dtype=np.float16).reshape(-1, n_dims)[:100000].astype(np.float32)
 mean = np.mean(dataset, axis=0)
 
 centered_dataset = dataset - mean
@@ -33,9 +25,7 @@ def random_ortho(dim):
     return q
 
 
-p = random_ortho(
-    n_dims
-)  # algorithm only uses the inverse of P, so just sample that directly
+p = random_ortho(n_dims)  # algorithm only uses the inverse of P, so just sample that directly
 p = p[:output_dims, :]
 
 
@@ -69,12 +59,7 @@ exact_results = sample @ queryset[0]
 for x in zip(approx_results, exact_results):
     print(*x)
 
-print(
-    *[
-        f"{x:.2f}"
-        for x in (approx_results - exact_results) / np.abs(exact_results).mean()
-    ]
-)
+print(*[f"{x:.2f}" for x in (approx_results - exact_results) / np.abs(exact_results).mean()])
 
 print(np.argsort(approx_results))
 print(np.argsort(exact_results))

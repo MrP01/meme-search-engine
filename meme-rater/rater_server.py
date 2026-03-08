@@ -19,14 +19,9 @@ async def get_pair(db):
         if row:
             m1, m2, iteration = row
         else:
-            filenames = [
-                x[0]
-                for x in await db.execute_fetchall("SELECT filename FROM files", ())
-            ]
+            filenames = [x[0] for x in await db.execute_fetchall("SELECT filename FROM files", ())]
             m1, m2 = tuple(sorted(random.sample(filenames, 2)))
-        csr = await db.execute(
-            "SELECT 1 FROM ratings WHERE meme1 = ? AND meme2 = ?", (m1, m2)
-        )
+        csr = await db.execute("SELECT 1 FROM ratings WHERE meme1 = ? AND meme2 = ?", (m1, m2))
         if not await csr.fetchone():
             return m1, m2, iteration
 
@@ -135,13 +130,7 @@ async def rate(request):
     meme1 = post["meme1"]
     meme2 = post["meme2"]
     iteration = post["iteration"]
-    rating = (
-        post["rating-useful"]
-        + ","
-        + post["rating-meme"]
-        + ","
-        + post["rating-aesthetic"]
-    )
+    rating = post["rating-useful"] + "," + post["rating-meme"] + "," + post["rating-aesthetic"]
     await db.execute(
         "INSERT INTO ratings (meme1, meme2, rating, iteration, ip) VALUES (?, ?, ?, ?, ?)",
         (meme1, meme2, rating, iteration, request.remote),

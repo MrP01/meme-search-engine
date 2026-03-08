@@ -40,15 +40,11 @@ with torch.inference_mode():
     val_set_size = len(loaded_arrays_permutation) - train_set_size
     print("sliced. executing.")
 
-    for batch_start in tqdm(
-        range(train_set_size, train_set_size + val_set_size, batch_size)
-    ):
+    for batch_start in tqdm(range(train_set_size, train_set_size + val_set_size, batch_size)):
         batch = numpy.stack(
             [
                 numpy.frombuffer(embedding, dtype=numpy.float16)
-                for embedding in loaded_arrays[
-                    loaded_arrays_permutation[batch_start : batch_start + batch_size]
-                ]
+                for embedding in loaded_arrays[loaded_arrays_permutation[batch_start : batch_start + batch_size]]
             ]
         )
         batch = torch.Tensor(batch).to("cuda")
@@ -63,9 +59,7 @@ meme_search_url = "https://nooscope.osmarks.net/?page=advanced&e="
 
 
 def emb_url(embedding):
-    return meme_search_url + base64.urlsafe_b64encode(
-        embedding.astype(np.float16).tobytes()
-    ).decode("utf-8")
+    return meme_search_url + base64.urlsafe_b64encode(embedding.astype(np.float16).tobytes()).decode("utf-8")
 
 
 async def get_exemplars():
@@ -87,20 +81,14 @@ async def get_exemplars():
                         "POST",
                         meme_search_backend,
                         json={
-                            "terms": [
-                                {"embedding": list(float(x) for x in embedding)}
-                            ],  # sorry
+                            "terms": [{"embedding": list(float(x) for x in embedding)}],  # sorry
                             "k": 10,
                         },
                     ) as res:
                         return (await res.json())["matches"][:10]
 
-                exemplars = await aioitertools.asyncio.gather(
-                    *[lookup(feature) for feature in chunk]
-                )
-                negative_exemplars = await aioitertools.asyncio.gather(
-                    *[lookup(-feature) for feature in chunk]
-                )
+                exemplars = await aioitertools.asyncio.gather(*[lookup(feature) for feature in chunk])
+                negative_exemplars = await aioitertools.asyncio.gather(*[lookup(-feature) for feature in chunk])
 
                 for offset, (feature, frequency) in sorted(
                     enumerate(zip(chunk, feature_frequencies[base:])),

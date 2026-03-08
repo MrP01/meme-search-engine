@@ -11,13 +11,8 @@ import shared
 
 
 def fetch_files_with_timestamps():
-    csr = shared.db.execute(
-        "SELECT filename, embedding, timestamp FROM files WHERE embedding IS NOT NULL"
-    )
-    x = [
-        (row[0], numpy.frombuffer(row[1], dtype="float16").copy(), row[2])
-        for row in csr.fetchall()
-    ]
+    csr = shared.db.execute("SELECT filename, embedding, timestamp FROM files WHERE embedding IS NOT NULL")
+    x = [(row[0], numpy.frombuffer(row[1], dtype="float16").copy(), row[2]) for row in csr.fetchall()]
     csr.close()
     return x
 
@@ -55,11 +50,7 @@ with torch.inference_mode():
         batch = files[bstart : bstart + batch_size]
         timestamps = [t1 for f1, e1, t1 in batch]
         embs = torch.stack([torch.Tensor(e1).to(config.dtype) for f1, e1, t1 in batch])
-        inputs = (
-            embs.unsqueeze(0)
-            .expand((config.n_ensemble, len(batch), config.d_emb))
-            .to(device)
-        )
+        inputs = embs.unsqueeze(0).expand((config.n_ensemble, len(batch), config.d_emb)).to(device)
         scores = model.ensemble(inputs).mean(dim=0).cpu().numpy()
         for sr in scores:
             for i, s in enumerate(sr):

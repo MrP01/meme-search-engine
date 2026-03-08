@@ -52,11 +52,7 @@ with torch.inference_mode():
                 for ((f1, e1), (f2, e2)) in batch
             ]
         )
-        inputs = (
-            embs.unsqueeze(0)
-            .expand((config.n_ensemble, batch_size, 2, config.d_emb))
-            .to(device)
-        )
+        inputs = embs.unsqueeze(0).expand((config.n_ensemble, batch_size, 2, config.d_emb)).to(device)
         win_probs = model(inputs)
         # print(win_probs, win_probs.shape)
         # print(win_probs.shape)

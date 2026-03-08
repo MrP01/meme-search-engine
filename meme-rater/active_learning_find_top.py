@@ -38,11 +38,7 @@ with torch.inference_mode():
         batch = files[bstart : bstart + batch_size]
         filenames = [f1 for f1, e1 in batch]
         embs = torch.stack([torch.Tensor(e1).to(config.dtype) for f1, e1 in batch])
-        inputs = (
-            embs.unsqueeze(0)
-            .expand((config.n_ensemble, len(batch), config.d_emb))
-            .to(device)
-        )
+        inputs = embs.unsqueeze(0).expand((config.n_ensemble, len(batch), config.d_emb)).to(device)
         scores = model.ensemble(inputs).median(dim=0).values.cpu().numpy()
         # print(batchvar, batchvar.shape)
         for filename, score in zip(filenames, scores):

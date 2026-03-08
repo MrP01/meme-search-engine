@@ -18,9 +18,7 @@ def viterbi_encode(
     assert D == D2
 
     # M x H x N - ||x-c||^2 ignoring x.T @ x component
-    unary_costs = -2 * (codebooks @ vectors.T) + (
-        torch.linalg.norm(codebooks, dim=2) ** 2
-    ).unsqueeze(-1)
+    unary_costs = -2 * (codebooks @ vectors.T) + (torch.linalg.norm(codebooks, dim=2) ** 2).unsqueeze(-1)
     binary_costs = torch.zeros(M - 1, H, H, dtype=torch.float, device=DEVICE)
     for i in range(M - 1):
         binary_costs[i] = 2 * codebooks[i] @ codebooks[i + 1].T
@@ -71,16 +69,10 @@ def update_codebooks(transformed_data, codes, h):
     new_codebook = torch.zeros(m, h, d, dtype=torch.float, device=DEVICE)
     for dim in tqdm.trange(d):
         relevant_codebooks = dims_for(dim, d, m)
-        assignment_matrix = torch.zeros(
-            n, len(relevant_codebooks), h, dtype=torch.float, device=DEVICE
-        )
+        assignment_matrix = torch.zeros(n, len(relevant_codebooks), h, dtype=torch.float, device=DEVICE)
         indices = (
-            torch.arange(n, dtype=torch.int, device=DEVICE).repeat(
-                len(relevant_codebooks)
-            ),
-            torch.arange(
-                len(relevant_codebooks), dtype=torch.int, device=DEVICE
-            ).repeat_interleave(n),
+            torch.arange(n, dtype=torch.int, device=DEVICE).repeat(len(relevant_codebooks)),
+            torch.arange(len(relevant_codebooks), dtype=torch.int, device=DEVICE).repeat_interleave(n),
             codes[:, relevant_codebooks].T.flatten(),
         )
         assignment_matrix[indices] = 1
@@ -105,9 +97,7 @@ def update_codebooks(transformed_data, codes, h):
         if unused.any():
             soln[unused] = torch.randn_like(soln[unused])
 
-        new_codebook[relevant_codebooks, :, dim] = soln.reshape(
-            len(relevant_codebooks), h
-        )
+        new_codebook[relevant_codebooks, :, dim] = soln.reshape(len(relevant_codebooks), h)
 
         if torch.isnan(new_codebook[relevant_codebooks, :, dim]).any():
             print(
@@ -118,9 +108,7 @@ def update_codebooks(transformed_data, codes, h):
                 new_codebook[relevant_codebooks, :, dim],
             )
             print("--- dim ---", dim)
-            print(
-                "- sum per column:", assignment_matrix.sum(dim=0)
-            )  # Check if any columns are all zero
+            print("- sum per column:", assignment_matrix.sum(dim=0))  # Check if any columns are all zero
             print("- rank:", torch.linalg.matrix_rank(assignment_matrix))
             print("- condition number:", torch.linalg.cond(assignment_matrix))
             raise SystemExit
@@ -136,9 +124,7 @@ def train_chainq(vectors, m, h, transform, codebooks, n_iters):
         transformed_data = vectors @ transform.T
         codes = torch.zeros(vectors.shape[0], m, dtype=torch.int, device=DEVICE)
         for i in range(0, vectors.shape[0], BATCH):
-            viterbi_encode(
-                codes[i : i + BATCH], transformed_data[i : i + BATCH], codebooks
-            )
+            viterbi_encode(codes[i : i + BATCH], transformed_data[i : i + BATCH], codebooks)
         print("encoded")
         # codebooks = update_codebooks(transformed_data, codes, h)
         print("codebooks updated")
@@ -147,9 +133,7 @@ def train_chainq(vectors, m, h, transform, codebooks, n_iters):
         for j in range(m):
             quantized[:] += codebooks[j, codes[:, j]]
         print("quantized")
-        print(
-            (quantized - transformed_data).abs().mean(), transformed_data.abs().mean()
-        )
+        print((quantized - transformed_data).abs().mean(), transformed_data.abs().mean())
 
         print("comparing")
         res = transformed_data.T @ quantized
@@ -168,19 +152,15 @@ with open("opq.msgpack", "rb") as f:
 
 n_dims = 1152
 dataset = torch.tensor(
-    np.random.permutation(
-        np.fromfile("embeddings.bin", dtype=np.float16)
-        .reshape(-1, n_dims)
-        .astype(np.float32)
-    )[: BATCH * 1],
+    np.random.permutation(np.fromfile("embeddings.bin", dtype=np.float16).reshape(-1, n_dims).astype(np.float32))[
+        : BATCH * 1
+    ],
     device=DEVICE,
 )
 
 codebooks = torch.zeros(64, 256, n_dims, dtype=torch.float, device=DEVICE)
 
-centroids = torch.tensor(
-    np.array(data["centroids"]).astype(np.float32).reshape(256, n_dims), device=DEVICE
-)
+centroids = torch.tensor(np.array(data["centroids"]).astype(np.float32).reshape(256, n_dims), device=DEVICE)
 for dim in range(n_dims):
     relevant_codebooks = dim // 64
     codebooks[relevant_codebooks, :, dim] = centroids[:, dim]

@@ -26,18 +26,14 @@ for val_loss in val_loss_data:
 
 # Calculate rolling average for loss
 window_size = 50
-rolling_avg = [
-    sum(loss[i : i + window_size]) / window_size
-    for i in range(len(loss) - window_size + 1)
-]
+rolling_avg = [sum(loss[i : i + window_size]) / window_size for i in range(len(loss) - window_size + 1)]
 rolling_steps = steps[window_size - 1 :]
 
 # Calculate rolling averages for validation loss series
 val_rolling_avgs = {}
 for key, series in val_loss_series.items():
     val_rolling_avgs[key] = [
-        sum(series[i : i + window_size]) / window_size
-        for i in range(len(series) - window_size + 1)
+        sum(series[i : i + window_size]) / window_size for i in range(len(series) - window_size + 1)
     ]
 
 print([(name, min(series)) for name, series in val_loss_series.items()])

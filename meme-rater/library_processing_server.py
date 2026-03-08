@@ -18,9 +18,7 @@ routes = web.RouteTableDef()
 
 @routes.get("/")
 async def index(request):
-    csr = await request.app["db"].execute(
-        "SELECT filename FROM library_queue ORDER BY score DESC"
-    )
+    csr = await request.app["db"].execute("SELECT filename FROM library_queue ORDER BY score DESC")
     (filename,) = await csr.fetchone()
     await csr.close()
     return web.Response(
@@ -88,9 +86,7 @@ async def rate(request):
         new_path = find_new_path(filename.replace(" ", "-"), real_path.suffix)
         print(real_path, new_path, real_path.suffix)
         shutil.move(real_path, new_path)
-    await db.execute(
-        "DELETE FROM library_queue WHERE filename = ?", (original_filename,)
-    )
+    await db.execute("DELETE FROM library_queue WHERE filename = ?", (original_filename,))
     await db.commit()
     return web.HTTPFound("/")
 

@@ -65,11 +65,7 @@ with torch.inference_mode():
         batch = files[bstart : bstart + batch_size]
         filenames = [filename for filename, embedding in batch]
         embs = torch.stack([torch.Tensor(embedding) for filename, embedding in batch])
-        inputs = (
-            embs.unsqueeze(0)
-            .expand((config.n_ensemble, len(batch), config.d_emb))
-            .to(device)
-        )
+        inputs = embs.unsqueeze(0).expand((config.n_ensemble, len(batch), config.d_emb)).to(device)
         scores = model.ensemble(inputs).float()
         mscores = torch.median(scores, dim=0).values
         for filename, mscore in zip(filenames, mscores):
@@ -91,9 +87,7 @@ async def run_inserts():
                 "POST",
                 meme_search_backend,
                 json={
-                    "terms": [
-                        {"embedding": list(float(x) for x in embedding)}
-                    ],  # sorry
+                    "terms": [{"embedding": list(float(x) for x in embedding)}],  # sorry
                     "k": 1,
                 },
             ) as res:

@@ -34,9 +34,7 @@ async def clip_server(sess: aiohttp.ClientSession, query, unpack_buffer=True):
             return response
         else:
             raise Exception(
-                response
-                if res.headers.get("content-type") == "application/msgpack"
-                else (await res.text())
+                response if res.headers.get("content-type") == "application/msgpack" else (await res.text())
             )
 
 
@@ -50,14 +48,7 @@ async def run_query(request):
         embeddings.extend(
             await clip_server(
                 sess,
-                {
-                    "images": [
-                        load_image(io.BytesIO(base64.b64decode(x)), target_image_size)[
-                            0
-                        ]
-                        for x, w in images
-                    ]
-                },
+                {"images": [load_image(io.BytesIO(base64.b64decode(x)), target_image_size)[0] for x, w in images]},
             )
         )
     if text := data.get("text", []):
@@ -67,9 +58,7 @@ async def run_query(request):
     weighted_embeddings.extend([numpy.array(x) for x in data.get("embeddings", [])])
     if not weighted_embeddings:
         return web.json_response([])
-    return web.json_response(
-        app["index"].search(sum(weighted_embeddings), top_k=data.get("top_k", 4000))
-    )
+    return web.json_response(app["index"].search(sum(weighted_embeddings), top_k=data.get("top_k", 4000)))
 
 
 @routes.get("/")
@@ -156,9 +145,7 @@ class Index:
             with ThreadPoolExecutor(max_workers=CONFIG.get("n_workers", 1)) as executor:
                 for task in asyncio.as_completed(
                     [
-                        asyncio.get_running_loop().run_in_executor(
-                            executor, load_and_chunk_image, file[0]
-                        )
+                        asyncio.get_running_loop().run_in_executor(executor, load_and_chunk_image, file[0])
                         for file in unocred
                     ]
                 ):
@@ -210,16 +197,12 @@ END;
                         async def do_batch(batch):
                             try:
                                 query = {"images": [arg[2] for arg in batch]}
-                                embeddings = await clip_server(
-                                    self.session, query, False
-                                )
+                                embeddings = await clip_server(self.session, query, False)
                                 await conn.executemany(
                                     "INSERT OR REPLACE INTO files VALUES (?, ?, ?)",
                                     [
                                         (filename, modtime, embedding)
-                                        for (filename, modtime, _), embedding in zip(
-                                            batch, embeddings
-                                        )
+                                        for (filename, modtime, _), embedding in zip(batch, embeddings)
                                     ],
                                 )
                                 await conn.commit()
@@ -235,9 +218,7 @@ END;
                             tg.create_task(do_batch(batch))
 
                         files = {}
-                        for filename, modtime in await conn.execute_fetchall(
-                            "SELECT filename, modtime FROM files"
-                        ):
+                        for filename, modtime in await conn.execute_fetchall("SELECT filename, modtime FROM files"):
                             files[filename] = modtime
                         await conn.commit()
                         batch = []
@@ -292,9 +273,7 @@ END;
                         while row := await csr.fetchone():
                             filename, modtime, embedding_vector = row
                             if filename not in filenames_set:
-                                new_data.append(
-                                    numpy.frombuffer(embedding_vector, dtype="float16")
-                                )
+                                new_data.append(numpy.frombuffer(embedding_vector, dtype="float16"))
                                 new_filenames.append(filename)
                     if not new_data:
                         return
@@ -308,18 +287,14 @@ END;
                             remove_indices.append(index)
                             self.associated_filenames[index] = None
                         if filename not in seen_files:
-                            await conn.execute(
-                                "DELETE FROM files WHERE filename = ?", (filename,)
-                            )
+                            await conn.execute("DELETE FROM files WHERE filename = ?", (filename,))
                             await conn.commit()
                     print("Deleting", len(remove_indices), "old entries")
                     # TODO concurrency
                     # TODO understand what that comment meant
                     if remove_indices:
                         self.faiss_index.remove_ids(numpy.array(remove_indices))
-                        self.associated_filenames = [
-                            x for x in self.associated_filenames if x is not None
-                        ]
+                        self.associated_filenames = [x for x in self.associated_filenames if x is not None]
                 finally:
                     await conn.close()
 

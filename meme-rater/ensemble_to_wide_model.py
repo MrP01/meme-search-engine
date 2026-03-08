@@ -49,21 +49,15 @@ with torch.inference_mode():
         out_layers.append(big_layer)
         out_bias.append(big_bias)
     # we do not need to preserve the bias on the downprojection as the win probability calculation is shift-invariant
-    downprojection = torch.zeros(
-        config.output_channels, config.n_ensemble * config.d_emb
-    )
+    downprojection = torch.zeros(config.output_channels, config.n_ensemble * config.d_emb)
     for i in range(config.n_ensemble):
-        downprojection[:, i * config.d_emb : (i + 1) * config.d_emb] = (
-            model.ensemble.models[i].output.weight.data.clone()
-        )
+        downprojection[:, i * config.d_emb : (i + 1) * config.d_emb] = model.ensemble.models[
+            i
+        ].output.weight.data.clone()
 
     for i in range(10):
         input = torch.randn(4, config.d_emb)
-        ground_truth_result = (
-            model.ensemble(input.unsqueeze(0).expand((config.n_ensemble, *input.shape)))
-            .mean(dim=0)
-            .T
-        )
+        ground_truth_result = model.ensemble(input.unsqueeze(0).expand((config.n_ensemble, *input.shape))).mean(dim=0).T
         r_result = input
         for layer, bias in zip(out_layers, out_bias):
             r_result = torch.matmul(layer, r_result.T) + bias.unsqueeze(-1).expand(

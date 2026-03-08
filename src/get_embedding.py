@@ -9,9 +9,7 @@ with open("mse_config.json") as f:
 
 
 def get_embedding(req):
-    return msgpack.unpackb(
-        requests.post(config["clip_server"], data=msgpack.packb(req)).content
-    )
+    return msgpack.unpackb(requests.post(config["clip_server"], data=msgpack.packb(req)).content)
 
 
 mode, output, input = sys.argv[1:]

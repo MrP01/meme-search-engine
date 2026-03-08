@@ -12,9 +12,7 @@ negatives = len(data) - positives
 
 for threshold, _ in data:
     tp = sum(1 for score, ground_truth in data if ground_truth and score >= threshold)
-    fp = sum(
-        1 for score, ground_truth in data if not ground_truth and score >= threshold
-    )
+    fp = sum(1 for score, ground_truth in data if not ground_truth and score >= threshold)
     tpr = tp / positives
     fpr = fp / negatives
     tprs.append(tpr)

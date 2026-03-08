@@ -15,9 +15,7 @@ async def main():
                 async with sess.post(
                     "http://localhost:5601",
                     json={
-                        "terms": [
-                            {"embedding": list(float(x) for x in embedding)}
-                        ],  # sorry
+                        "terms": [{"embedding": list(float(x) for x in embedding)}],  # sorry
                         "k": 10,
                     },
                 ) as res:

@@ -10,7 +10,5 @@ name = input("Name: ")
 url = input("Embedding search URL: ")
 data = base64.urlsafe_b64decode(url.removeprefix("https://mse.osmarks.net/?e="))
 arr = np.frombuffer(data, dtype=np.float16).copy()
-db.execute(
-    "INSERT OR REPLACE INTO predefined_embeddings VALUES (?, ?)", (name, arr.tobytes())
-)
+db.execute("INSERT OR REPLACE INTO predefined_embeddings VALUES (?, ?)", (name, arr.tobytes()))
 db.commit()

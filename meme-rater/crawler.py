@@ -122,9 +122,7 @@ async def main(time_threshold):
                         break
                 try:
                     if not excluded:
-                        result = await download(
-                            sess, item["url"], os.path.join("images", bck, id)
-                        )
+                        result = await download(sess, item["url"], os.path.join("images", bck, id))
                 except Exception as e:
                     print("\nMeme acquisition failure:", e)
                     return
@@ -144,9 +142,7 @@ async def main(time_threshold):
                 except asyncio.TimeoutError:
                     pass
 
-        async for items in fetch_past(
-            sess, "https://www.reddit.com/user/osmarks/m/memeharvesting/new", 20000
-        ):
+        async for items in fetch_past(sess, "https://www.reddit.com/user/osmarks/m/memeharvesting/new", 20000):
             # print("got new chunk")
             await sem.acquire()
             sem.release()

@@ -8,12 +8,10 @@ output_code_size = 64
 output_code_bits = 8
 output_codebook_size = 2**output_code_bits
 n_dims_per_code = n_dims // output_code_size
-dataset = np.random.permutation(
-    np.fromfile("embeddings.bin", dtype=np.float16).reshape(-1, n_dims)
-).astype(np.float32)
-queryset = np.random.permutation(
-    np.fromfile("query.bin", dtype=np.float16).reshape(-1, n_dims)
-)[:100000].astype(np.float32)
+dataset = np.random.permutation(np.fromfile("embeddings.bin", dtype=np.float16).reshape(-1, n_dims)).astype(np.float32)
+queryset = np.random.permutation(np.fromfile("query.bin", dtype=np.float16).reshape(-1, n_dims))[:100000].astype(
+    np.float32
+)
 device = "cuda"
 
 
@@ -53,9 +51,7 @@ def partition(
         opt.zero_grad(set_to_none=True)
 
         # randomly sample queries (with replacement, probably fine)
-        queries_for_iteration = queries[
-            torch.randint(0, len(queries), (query_batch_size,), device=device)
-        ]
+        queries_for_iteration = queries[torch.randint(0, len(queries), (query_batch_size,), device=device)]
 
         for i in range(0, n_vectors, batch_size):
             loss = torch.tensor(0.0, device=device)
@@ -92,9 +88,7 @@ centroids.requires_grad = True
 opt = torch.optim.Adam([centroids], lr=0.0005)
 for i in range(30):
     # update centroids to minimize query-aware quantization loss
-    partition(
-        vectors, centroids, projection, opt, queries, output_codebook_size, max_iter=300
-    )
+    partition(vectors, centroids, projection, opt, queries, output_codebook_size, max_iter=300)
     # compute new projection as R = VU^T from XY^T = USV^T (SVD)
     # where X is dataset vectors, Y is quantized dataset vectors
     with torch.no_grad():

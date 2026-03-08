@@ -13,9 +13,7 @@ def scale(xs):
 n_dims = 1152
 n_used_dims = 32
 data = (
-    np.frombuffer(open("embeddings.bin", "rb").read(), dtype=np.float16)
-    .reshape(-1, n_dims)
-    .astype(np.float32)
+    np.frombuffer(open("embeddings.bin", "rb").read(), dtype=np.float16).reshape(-1, n_dims).astype(np.float32)
 )  # TODO
 
 # Create histogram bins

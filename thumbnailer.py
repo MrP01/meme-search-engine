@@ -153,12 +153,7 @@ def generate_output_format_string(formats):
 
 def to_outpath(input, format):
     format_ext = output_formats[format][1]
-    return (
-        f"{''.join([i if i in filesafe_charset else '_' for i in input])}"
-        + "."
-        + format
-        + format_ext
-    )
+    return f"{''.join([i if i in filesafe_charset else '_' for i in input])}" + "." + format + format_ext
 
 
 full_formats = generate_output_format_string(output_formats.keys())
@@ -173,9 +168,7 @@ for directory, subdirectories, files in os.walk(input_path):
             path = os.path.join(directory, file)
             rawname = path.removeprefix(input_path).removeprefix("/")
             st = os.stat(path)
-            csr = con.execute(
-                "SELECT mtime, formats FROM thumb WHERE file = ?", (rawname,)
-            )
+            csr = con.execute("SELECT mtime, formats FROM thumb WHERE file = ?", (rawname,))
             row = csr.fetchone()
             if not row:
                 mtime, formats = None, "[]"
@@ -184,9 +177,7 @@ for directory, subdirectories, files in os.walk(input_path):
             if st.st_mtime != mtime or formats != full_formats:
                 formats = set(json.loads(formats))
                 for new_format in out_formats_set - formats:
-                    new_path = os.path.join(
-                        output_path, to_outpath(rawname, new_format)
-                    )
+                    new_path = os.path.join(output_path, to_outpath(rawname, new_format))
                     try:
                         output_formats[new_format][0](path, new_path)
                     except:

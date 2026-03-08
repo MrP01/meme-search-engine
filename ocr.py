@@ -50,9 +50,7 @@ async def scan_image_chunk(sess, image):
             filename="ocr" + str(timestamp) + ".png",
             content_type="image/png",
         )
-        async with sess.post(
-            url, headers=headers, cookies=cookies, data=data, timeout=10
-        ) as res:
+        async with sess.post(url, headers=headers, cookies=cookies, data=data, timeout=10) as res:
             body = await res.text()
 
     # I really worry about Google sometimes. This is not a sensible format.
@@ -100,9 +98,7 @@ def chunk_image(image: Image):
             Image.LANCZOS,
         )
     for y in range(0, image.height, MAX_SCAN_DIM):
-        chunks.append(
-            image.crop((0, y, image.width, min(y + MAX_SCAN_DIM, image.height)))
-        )
+        chunks.append(image.crop((0, y, image.width, min(y + MAX_SCAN_DIM, image.height))))
     return chunks
 
 
@@ -116,9 +112,7 @@ async def scan_chunks(sess: aiohttp.ClientSession, chunks: [Image]):
         for segment in new_segments:
             text += segment + "\n"
         for i, (segment, region) in enumerate(zip(new_segments, new_regions)):
-            regions.append(
-                {**region, "y": region["y"] + (MAX_SCAN_DIM * i), "text": segment}
-            )
+            regions.append({**region, "y": region["y"] + (MAX_SCAN_DIM * i), "text": segment})
     return text, regions
 
 
@@ -133,9 +127,7 @@ if __name__ == "__main__":
             print(
                 await scan_image(
                     sess,
-                    Image.open(
-                        "/data/public/memes-or-something/linear-algebra-chess.png"
-                    ),
+                    Image.open("/data/public/memes-or-something/linear-algebra-chess.png"),
                 )
             )
 

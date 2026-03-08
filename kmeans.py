@@ -3,11 +3,7 @@ import torch
 from torch import autograd
 
 n_dims = 1152
-data = (
-    np.fromfile("500k_vecs.bin", dtype=np.float16)
-    .reshape(-1, n_dims)
-    .astype(np.float32)
-)
+data = np.fromfile("500k_vecs.bin", dtype=np.float16).reshape(-1, n_dims).astype(np.float32)
 n_clusters = 42
 
 
@@ -38,9 +34,7 @@ def partition_soft(vectors, k, max_iter=100, batch_size=8192):
 
                 similarities = torch.matmul(batch, norm_centroids.T)
 
-                soft_assignments = ((similarities + biases) / temperature).softmax(
-                    dim=1
-                )
+                soft_assignments = ((similarities + biases) / temperature).softmax(dim=1)
                 # print(soft_assignments[0])
 
                 # print(soft_assignments.shape, similarities.shape)
@@ -52,17 +46,11 @@ def partition_soft(vectors, k, max_iter=100, batch_size=8192):
 
             opt.zero_grad()
 
-            distances_from_ideal_cluster_size = (cluster_sizes - desired_size).pow(
-                2
-            ) / (desired_size**2)
+            distances_from_ideal_cluster_size = (cluster_sizes - desired_size).pow(2) / (desired_size**2)
             size_loss = distances_from_ideal_cluster_size.mean()
             bias_loss = biases.pow(2).mean()
             score_loss = -score.mean()
-            loss = (
-                size_scale * size_loss
-                + bias_scale * bias_loss
-                + score_scale * score_loss
-            )
+            loss = size_scale * size_loss + bias_scale * bias_loss + score_scale * score_loss
             loss.backward()
             opt.step()
 
@@ -95,9 +83,7 @@ def simulated_annealing(vectors, k, max_iter=100, batch_size=31768):
     desired_size = n_vectors / k
 
     def fitness(centroids):
-        cluster_sizes = torch.zeros(
-            SPILL_K, k, device=vectors.device, dtype=torch.int32
-        )
+        cluster_sizes = torch.zeros(SPILL_K, k, device=vectors.device, dtype=torch.int32)
         norm_centroids = torch.nn.functional.normalize(centroids)
 
         for i in range(0, n_vectors, batch_size):
@@ -174,9 +160,7 @@ print([x[1] for x in big_clusters])
 """
 
 centroids = (
-    simulated_annealing(
-        torch.tensor(data, device=torch.device("cuda")), n_clusters, max_iter=80000
-    )
+    simulated_annealing(torch.tensor(data, device=torch.device("cuda")), n_clusters, max_iter=80000)
     .detach()
     .cpu()
     .numpy()

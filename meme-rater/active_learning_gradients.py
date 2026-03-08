@@ -60,17 +60,11 @@ for bstart in tqdm(range(0, len(pairs), batch_size)):
     filenames = [(f1, f2) for ((f1, e1), (f2, e2)) in batch]
     embs = torch.stack(
         [
-            torch.stack(
-                (torch.Tensor(e1).to(config.dtype), torch.Tensor(e2).to(config.dtype))
-            )
+            torch.stack((torch.Tensor(e1).to(config.dtype), torch.Tensor(e2).to(config.dtype)))
             for ((f1, e1), (f2, e2)) in batch
         ]
     )
-    inputs = (
-        embs.unsqueeze(0)
-        .expand((config.n_ensemble, batch_size, 2, config.d_emb))
-        .to(device)
-    )
+    inputs = embs.unsqueeze(0).expand((config.n_ensemble, batch_size, 2, config.d_emb)).to(device)
     # win_probs = model(inputs)
     # TODO gradients
     # don't take variance: do backwards pass and compute gradient norm

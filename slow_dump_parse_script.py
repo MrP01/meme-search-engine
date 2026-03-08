@@ -10,9 +10,7 @@ with open("sample.zst", "rb") as f:
     count = 0
     while True:
         try:
-            url, id, title, subreddit, author, timestamp, embedding = umsgpack.unpack(
-                reader
-            )
+            url, id, title, subreddit, author, timestamp, embedding = umsgpack.unpack(reader)
             embedding = bytes(embedding)
             data.append(
                 {

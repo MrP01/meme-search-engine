@@ -59,9 +59,7 @@ params = sum(p.numel() for p in model.parameters())
 print(f"{params / 1e6:.1f}M parameters")
 print(model)
 
-optimizer = torch.optim.AdamW(
-    model.parameters(), lr=config.lr, weight_decay=config.weight_decay
-)
+optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
 
 
 def train_step(model, batch, real):
@@ -100,12 +98,7 @@ def batch_from_inputs(
         ]
     ).to(device)
     target = torch.stack(
-        [
-            torch.Tensor(numpy.array([rating for emb1, emb2, rating in input])).to(
-                config.model.dtype
-            )
-            for input in inputs
-        ]
+        [torch.Tensor(numpy.array([rating for emb1, emb2, rating in input])).to(config.model.dtype) for input in inputs]
     ).to(device)
     return batch_input, target
 
@@ -116,9 +109,7 @@ def evaluate(steps):
     results = {"step": steps, "time": time.time(), "val_loss": {}}
     for vset, validation in enumerate(validations):
         with torch.no_grad():
-            batch_input, target = batch_from_inputs(
-                [validation[:128] for _ in range(config.model.n_ensemble)]
-            )
+            batch_input, target = batch_from_inputs([validation[:128] for _ in range(config.model.n_ensemble)])
             result = model(batch_input).float()
             val_loss = F.binary_cross_entropy(result, target).detach().cpu().item()
             model.train()
@@ -146,27 +137,15 @@ with open(logfile, "w") as log:
     steps = 0
     log.write(JSONEncoder().encode(asdict(config)) + "\n")
     for epoch in range(config.epochs):
-        for train in (
-            trains
-            if config.data_grouped_by_iter
-            else [[sample for trainss in trains for sample in trainss]]
-        ):
-            data_orders = shared.generate_random_permutations(
-                train, config.model.n_ensemble
-            )
+        for train in trains if config.data_grouped_by_iter else [[sample for trainss in trains for sample in trainss]]:
+            data_orders = shared.generate_random_permutations(train, config.model.n_ensemble)
             for bstart in range(0, len(train), config.batch_size):
                 batch_input, target = batch_from_inputs(
-                    [
-                        order[bstart : bstart + config.batch_size]
-                        for order in data_orders
-                    ]
+                    [order[bstart : bstart + config.batch_size] for order in data_orders]
                 )
                 loss = train_step(model, batch_input, target)
                 print(steps, loss)
-                log.write(
-                    json.dumps({"loss": loss, "step": steps, "time": time.time()})
-                    + "\n"
-                )
+                log.write(json.dumps({"loss": loss, "step": steps, "time": time.time()}) + "\n")
                 if steps % 10 == 0:
                     if steps % 50 == 0:
                         save_ckpt(log, steps)

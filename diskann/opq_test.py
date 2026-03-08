@@ -7,16 +7,8 @@ output_code_size = 64
 output_code_bits = 8
 output_codebook_size = 2**output_code_bits
 n_dims_per_code = n_dims // output_code_size
-dataset = (
-    np.fromfile("embeddings.bin", dtype=np.float16)
-    .reshape(-1, n_dims)[:100000]
-    .astype(np.float32)
-)
-queryset = (
-    np.fromfile("query.bin", dtype=np.float16)
-    .reshape(-1, n_dims)[:100000]
-    .astype(np.float32)
-)
+dataset = np.fromfile("embeddings.bin", dtype=np.float16).reshape(-1, n_dims)[:100000].astype(np.float32)
+queryset = np.fromfile("query.bin", dtype=np.float16).reshape(-1, n_dims)[:100000].astype(np.float32)
 device = "cpu"
 
 
@@ -35,9 +27,7 @@ def pq_assign(centroids, batch):
 
 with open("opq.msgpack", "rb") as f:
     data = msgpack.unpack(f)
-    centroids = torch.tensor(data["centroids"], device=device).reshape(
-        2**output_code_bits, n_dims
-    )
+    centroids = torch.tensor(data["centroids"], device=device).reshape(2**output_code_bits, n_dims)
     projection = torch.tensor(data["transform"], device=device).reshape(n_dims, n_dims)
 
 vectors = torch.tensor(dataset, device=device)

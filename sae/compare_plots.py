@@ -22,10 +22,7 @@ def read_log(log):
 
     # Calculate rolling average for loss
     window_size = 50
-    rolling_avg = [
-        sum(loss[i : i + window_size]) / window_size
-        for i in range(len(loss) - window_size + 1)
-    ]
+    rolling_avg = [sum(loss[i : i + window_size]) / window_size for i in range(len(loss) - window_size + 1)]
     rolling_steps = steps[window_size - 1 :]
 
     return rolling_steps, rolling_avg

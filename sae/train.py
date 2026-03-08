@@ -49,9 +49,7 @@ params = sum(p.numel() for p in model.parameters())
 print(f"{params / 1e6:.1f}M parameters")
 print(model)
 
-optimizer = torch.optim.AdamW(
-    model.parameters(), lr=config.lr, weight_decay=config.weight_decay
-)
+optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
 
 
 def train_step(model, batch):

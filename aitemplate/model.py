@@ -28,9 +28,7 @@ class Encoder1DBlock(nn.Module):
     def __init__(self, emb_dim, mlp_dim, num_heads, batch_size, seq_len):
         super().__init__()
         self.ln1 = nn.LayerNorm(emb_dim)
-        self.mha = nn.MultiheadAttention(
-            emb_dim, batch_size, seq_len, num_heads, use_mem_eff=True
-        )
+        self.mha = nn.MultiheadAttention(emb_dim, batch_size, seq_len, num_heads, use_mem_eff=True)
         self.mlp = MLPBlock(emb_dim, mlp_dim)
         self.ln2 = nn.LayerNorm(emb_dim)
 
@@ -45,10 +43,7 @@ class Encoder(nn.Module):
     def __init__(self, emb_dim, mlp_dim, num_heads, batch_size, seq_len, depth):
         super().__init__()
         self.layers = nn.ModuleList(
-            [
-                Encoder1DBlock(emb_dim, mlp_dim, num_heads, batch_size, seq_len)
-                for i in range(depth)
-            ]
+            [Encoder1DBlock(emb_dim, mlp_dim, num_heads, batch_size, seq_len) for i in range(depth)]
         )
         self.ln = nn.LayerNorm(emb_dim)
 
@@ -112,9 +107,7 @@ class MAPHead(nn.Module):
 
     def forward(self, x):
         ql = ops.expand()(self.probe.tensor(), [self.batch_size, -1, -1])
-        q = ops.reshape()(
-            self.q(ql), [self.batch_size, self.num_heads, 1, self.head_dim]
-        )
+        q = ops.reshape()(self.q(ql), [self.batch_size, self.num_heads, 1, self.head_dim])
         kv = ops.permute()(
             ops.reshape()(
                 self.kv(x),

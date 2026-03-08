@@ -34,9 +34,7 @@ CKPT, TXTVARIANT, EMBDIM, SEQLEN, VOCAB = {
 
 model_cfg = ml_collections.ConfigDict()
 model_cfg.image_model = "vit"  # TODO(lbeyer): remove later, default
-model_cfg.text_model = (
-    "proj.image_text.text_transformer"  # TODO(lbeyer): remove later, default
-)
+model_cfg.text_model = "proj.image_text.text_transformer"  # TODO(lbeyer): remove later, default
 model_cfg.image = dict(variant=VARIANT, pool_type="map")
 model_cfg.text = dict(variant=TXTVARIANT, vocab_size=VOCAB)
 model_cfg.out_dim = (None, EMBDIM)  # (image_out_dim, text_out_dim)
@@ -61,16 +59,10 @@ print("Model loaded")
 BS = CONFIG["max_batch_size"]
 MODELNAME = CONFIG["model_name"]
 
-InferenceParameters = collections.namedtuple(
-    "InferenceParameters", ["text", "images", "callback"]
-)
+InferenceParameters = collections.namedtuple("InferenceParameters", ["text", "images", "callback"])
 
-items_ctr = Counter(
-    "modelserver_total_items", "Items run through model server", ["model", "modality"]
-)
-inference_time_hist = Histogram(
-    "modelserver_inftime", "Time running inference", ["model", "batch_size"]
-)
+items_ctr = Counter("modelserver_total_items", "Items run through model server", ["model", "modality"])
+inference_time_hist = Histogram("modelserver_inftime", "Time running inference", ["model", "batch_size"])
 batch_count_ctr = Counter("modelserver_batchcount", "Inference batches run", ["model"])
 
 
@@ -114,9 +106,7 @@ def do_inference(params: InferenceParameters):
                 features = run_text_model(text)
         elif images is not None:
             items_ctr.labels(MODELNAME, "image").inc(images.shape[0])
-            with inference_time_hist.labels(
-                MODELNAME + "-image", images.shape[0]
-            ).time():
+            with inference_time_hist.labels(MODELNAME + "-image", images.shape[0]).time():
                 features = run_image_model(images)
         batch_count_ctr.labels(MODELNAME).inc()
         # TODO got to divide somewhere
@@ -149,13 +139,7 @@ def preprocessing_thread():
                 assert len(images) <= BS, f"max batch size is {BS}"
                 images = numpy.array(
                     [
-                        pp_img(
-                            {
-                                "image": numpy.array(
-                                    Image.open(io.BytesIO(image)).convert("RGB")
-                                )
-                            }
-                        )["image"]
+                        pp_img({"image": numpy.array(Image.open(io.BytesIO(image)).convert("RGB"))})["image"]
                         for image in images
                     ]
                 )
