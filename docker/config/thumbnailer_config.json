@@ -1,5 +1,5 @@
 {
-    "database": "/app/db/thumb.sqlite3",
-    "input": "/data/memes",
-    "output": "/data/memes/thumbs"
+  "database": "/app/db/thumb.sqlite3",
+  "input": "/data/memes",
+  "output": "/data/memes/thumbs"
 }

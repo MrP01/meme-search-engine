@@ -1,6 +1,4 @@
 {
-    "image_dim": 1000,
-    "lens_options": {
-
-    }
+  "image_dim": 1000,
+  "lens_options": {}
 }
