@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import torch
 import threading
 from aiohttp import web
